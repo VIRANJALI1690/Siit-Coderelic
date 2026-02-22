@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'https://siit-backend-hvs7.onrender.com/',
+    baseURL: 'http://localhost:5000/api',
 });
 
 // Add a request interceptor to include the token
