@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../utils/api';
-import { motion } from 'framer-motion';
 import { Upload, X, Save } from 'lucide-react';
 
 // The PublishProject page handles both creating new projects and editing existing ones
@@ -138,12 +137,9 @@ const PublishProject = () => {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            {/* Smooth animation for the form container */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-700"
+            {/* Container without animation */}
+            <div
+                className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-200 dark:border-slate-700"
             >
                 <h2 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white border-b pb-4 dark:border-slate-700 flex items-center">
                     {isEditMode ? <><Save className="mr-3 text-indigo-500" /> Edit Project</> : <><Upload className="mr-3 text-indigo-500" /> Publish New Project</>}
@@ -227,7 +223,7 @@ const PublishProject = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`flex items-center px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 hover:shadow-lg transform transition hover:-translate-y-0.5 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`flex items-center px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                             {loading ? (isEditMode ? 'Updating...' : 'Publishing...') : (
                                 <>
@@ -238,7 +234,7 @@ const PublishProject = () => {
                         </button>
                     </div>
                 </form>
-            </motion.div>
+            </div>
         </div>
     );
 };

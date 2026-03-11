@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Github, ExternalLink, PlayCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -11,11 +10,8 @@ const ProjectCard = ({ project }) => {
     };
 
     return (
-        <motion.div
-            // Hover effect: lifts the card slightly and scales it up
-            whileHover={{ y: -8, scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="group bg-white dark:bg-[#0f172a] rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col h-full"
+        <div
+            className="group bg-white dark:bg-[#0f172a] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 transition-all duration-300 flex flex-col h-full"
         >
             {/* Project Image Section */}
             <div className="relative h-48 overflow-hidden bg-slate-100 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
@@ -108,7 +104,7 @@ const ProjectCard = ({ project }) => {
                     </span>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 };
 

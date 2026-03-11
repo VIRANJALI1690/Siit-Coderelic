@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import ProjectCard from '../components/ProjectCard';
-import { motion } from 'framer-motion';
 import { Edit, Github, Linkedin, Briefcase, Mail, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -99,23 +98,21 @@ const Profile = () => {
         <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {/* Left Sidebar: Displays User Profile Details */}
-                <motion.div
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
+                <div
                     className="md:col-span-1"
                 >
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sticky top-24 border border-slate-200 dark:border-slate-700">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 sticky top-24 border border-slate-200 dark:border-slate-700">
                         <div className="flex flex-col items-center text-center">
                             {/* Profile Image with Edit Button */}
                             <div className="relative mb-4">
                                 <img
                                     src={user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.username}
                                     alt="Profile"
-                                    className="w-32 h-32 rounded-full object-cover border-4 border-indigo-500 shadow-md"
+                                    className="w-32 h-32 rounded-full object-cover border-4 border-indigo-500"
                                 />
                                 <button
                                     onClick={() => setIsEditing(!isEditing)}
-                                    className="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full text-white hover:bg-indigo-700 transition-all hover:scale-110 shadow-lg"
+                                    className="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full text-white hover:bg-indigo-700 transition-colors"
                                 >
                                     <Edit size={16} />
                                 </button>
@@ -159,7 +156,7 @@ const Profile = () => {
                             )}
                         </div>
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Right Area: Displays the grid of user's uploaded projects */}
                 <div className="md:col-span-2">
@@ -176,7 +173,7 @@ const Profile = () => {
                                     {/* The ProjectCard shows the project's visual preview */}
                                     <ProjectCard project={project} />
                                     {/* Admin icons (Edit/Delete) overlay on hover */}
-                                    <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10">
+                                    <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                         <Link
                                             to={`/edit-project/${project._id}`}
                                             className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 transition-all"

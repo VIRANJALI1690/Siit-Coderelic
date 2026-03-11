@@ -70,6 +70,18 @@ const updateUserProfile = async (req, res) => {
             }
 
             if (req.body.password) {
+                // If the user wants to change their password, they must provide the old password
+                if (!req.body.currentPassword) {
+                    res.status(400);
+                    throw new Error('Please provide your current password to set a new one');
+                }
+
+                const isMatch = await user.matchPassword(req.body.currentPassword);
+                if (!isMatch) {
+                    res.status(401);
+                    throw new Error('Current password is incorrect');
+                }
+
                 user.password = req.body.password;
             }
 

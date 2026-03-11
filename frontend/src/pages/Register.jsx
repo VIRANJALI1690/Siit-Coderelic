@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
 
 // The Register page allows new users to create an account
 const Register = () => {
@@ -46,22 +45,12 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen flex items-start justify-center bg-gray-50 dark:bg-gray-900 pt-4 pb-4 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">
-                        Create Account
-                    </h2>
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Join the community of developers
-                    </p>
-                </div>
 
-                {/* We use motion.div for a smooth fade-in animation */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10"
+                {/* Container without animation */}
+                <div
+                    className="bg-white dark:bg-gray-800 py-8 px-4 sm:rounded-lg sm:px-10"
                 >
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         {/* Show error message if it exists */}
@@ -69,33 +58,33 @@ const Register = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
-                            <input name="name" type="text" required value={name} onChange={handleChange} placeholder="Enter your full name" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white transition-all" />
+                            <input name="name" type="text" required value={name} onChange={handleChange} placeholder="Enter your full name" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-                            <input name="username" type="text" value={username} onChange={handleChange} placeholder="Enter your username" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white transition-all" />
+                            <input name="username" type="text" value={username} onChange={handleChange} placeholder="Enter your username" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email address</label>
-                            <input name="email" type="email" required value={email} onChange={handleChange} placeholder="Enter your email" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white transition-all" />
+                            <input name="email" type="email" required value={email} onChange={handleChange} placeholder="Enter your email" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                            <input name="password" type="password" required value={password} onChange={handleChange} placeholder="Enter your password" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white transition-all" />
+                            <input name="password" type="password" required value={password} onChange={handleChange} placeholder="Enter your password" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm Password</label>
-                            <input name="confirmPassword" type="password" required value={confirmPassword} onChange={handleChange} placeholder="Confirm your password" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white transition-all" />
+                            <input name="confirmPassword" type="password" required value={confirmPassword} onChange={handleChange} placeholder="Confirm your password" className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
                         </div>
 
                         <div>
                             <button
                                 type="submit"
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all hover:scale-[1.02]"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
                                 Sign Up
                             </button>
@@ -108,7 +97,7 @@ const Register = () => {
                             Log in
                         </Link>
                     </div>
-                </motion.div>
+                </div>
             </div>
         </div>
     );

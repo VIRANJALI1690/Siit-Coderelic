@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../utils/api';
 import { Loader2, Github, ExternalLink, ArrowLeft } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 // The ProjectDetails page shows all information about a single specific project
 const ProjectDetails = () => {
@@ -42,12 +41,10 @@ const ProjectDetails = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 {/* Left Side: Visual Content (Video Player or Thumbnail Image) */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                <div
                     className="space-y-6"
                 >
-                    <div className="rounded-xl overflow-hidden shadow-2xl bg-black border border-slate-200 dark:border-slate-800">
+                    <div className="rounded-xl overflow-hidden bg-black border border-slate-200 dark:border-slate-800">
                         {project.demoVideo ? (
                             <div className="aspect-w-16 aspect-h-9 flex items-center justify-center">
                                 {/* If there's a demo video, we show it in an iframe or video player */}
@@ -63,12 +60,10 @@ const ProjectDetails = () => {
                             <img src={project.thumbnail} alt={project.title} className="w-full h-auto object-cover max-h-[500px]" />
                         )}
                     </div>
-                </motion.div>
+                </div>
 
                 {/* Right Side: Information Content (Title, Description, Tech Stack, Links) */}
-                <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
+                <div
                     className="space-y-6"
                 >
                     <div>
@@ -85,7 +80,7 @@ const ProjectDetails = () => {
                             <img
                                 src={project.user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + project.user?.name}
                                 alt={project.user?.name}
-                                className="w-10 h-10 rounded-full border border-slate-200 mr-3 shadow-sm"
+                                className="w-10 h-10 rounded-full border border-slate-200 mr-3"
                             />
                             <div>
                                 <p className="text-slate-900 dark:text-slate-100 font-medium">By {project.user?.name}</p>
@@ -121,7 +116,7 @@ const ProjectDetails = () => {
                                 href={project.githubLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-lg transition-all hover:scale-[1.02]"
+                                className="flex-1 flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-lg transition-colors"
                             >
                                 <Github size={20} />
                                 <span>View Source</span>
@@ -132,14 +127,14 @@ const ProjectDetails = () => {
                                 href={project.liveLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex-1 flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-all hover:scale-[1.02]"
+                                className="flex-1 flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg transition-colors"
                             >
                                 <ExternalLink size={20} />
                                 <span>Live Demo</span>
                             </a>
                         )}
                     </div>
-                </motion.div>
+                </div>
             </div>
         </div>
     );
