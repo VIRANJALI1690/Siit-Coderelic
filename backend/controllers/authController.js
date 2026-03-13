@@ -15,6 +15,7 @@ const generateToken = (id) => {
 // It takes name, email, password, and username from the frontend
 // It checks if the user already exists, then creates a new user in the database
 const registerUser = async (req, res) => {
+    console.log("Register request body:", req.body);
     const { name, email, password, username } = req.body;
 
     // Validation: Ensure all required fields are present
@@ -65,12 +66,13 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
+        console.error("Error creating user:", error);
         // This handles cases where the username or email might still conflict
         if (error.code === 11000) {
             const field = Object.keys(error.keyValue)[0];
             return res.status(400).json({ message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` });
         }
-        return res.status(400).json({ message: 'Error creating user', error: error.message });
+        return res.status(400).json({ message: error.message || 'Error creating user' });
     }
 };
 
