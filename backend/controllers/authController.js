@@ -77,8 +77,27 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` });
         }
 
-        // If any other error occurs (like database connection issues), send a 400 error with the message
-        return res.status(400).json({ message: error.message || 'Error creating user' });
+        // Handle MongoDB Atlas WriteConcernError (code 64) or network timeout after write
+        // In this case, the document WAS actually saved to the database despite the error.
+        // We look up the user by email to confirm, and return success if found.
+        if (error.code === 64 || (error.result && error.result.result && error.result.result.ok === 1)) {
+            const savedUser = await User.findOne({ email });
+            if (savedUser) {
+                console.log("WriteConcernError but user was saved. Returning success.");
+                return res.status(201).json({
+                    _id: savedUser._id,
+                    name: savedUser.name,
+                    email: savedUser.email,
+                    username: savedUser.username,
+                    role: savedUser.role,
+                    token: generateToken(savedUser._id),
+                    avatar: savedUser.avatar,
+                });
+            }
+        }
+
+        // If any other error occurs (like database connection issues), send a 500 error with the message
+        return res.status(500).json({ message: error.message || 'Error creating user' });
     }
 };
 

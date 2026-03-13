@@ -15,7 +15,7 @@ const connectDB = async () => {
             const parts = uri.split('?');
             const base = parts[0];
             const query = parts[1];
-            
+
             if (base && query) {
                 const dbNameMatch = query.match(/majority\/(.+)$/);
                 if (dbNameMatch) {
