@@ -103,17 +103,17 @@ const Home = () => {
                     <div className="text-center space-y-6">
                         {/* Website Name & Tagline */}
                         <div className="space-y-4">
-                            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">
+                            <h1 className="text-4xl md:text-7xl font-bold tracking-tight text-[#0F172A] dark:text-[#F1F5F9]">
                                 The <span className="text-[#4F46E5] dark:text-[#6366F1]">Platform</span>
                             </h1>
-                            <p className="text-xl md:text-2xl text-[#475569] dark:text-[#94A3B8] font-medium leading-[1.6]">
+                            <p className="text-lg md:text-2xl text-[#475569] dark:text-[#94A3B8] font-medium leading-[1.6]">
                                 Where Seniors Build. Juniors Get Inspired.
                             </p>
                         </div>
 
                         {/* New Text and Login/Register Buttons */}
                         <div className="py-4">
-                            <p className="text-xl md:text-2xl text-[#475569] dark:text-[#94A3B8] font-medium leading-[1.6]">
+                            <p className="text-lg md:text-2xl text-[#475569] dark:text-[#94A3B8] font-medium leading-[1.6]">
                                 Your final year project is your opportunity to shape the next generation of coders. Share your journey and breakthroughs to help others get succeed.
                             </p>
                         </div>

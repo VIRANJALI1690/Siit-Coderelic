@@ -42,16 +42,16 @@ const registerUser = async (req, res) => {
         }
     }
 
-    // If everything is okay, we try to create the user
+    // If everything is okay, we try to create the user in the database
     try {
         const user = await User.create({
             name,
             email,
             password,
-            username: username || email.split('@')[0],
+            username: username || email.split('@')[0], // If no username is given, use the first part of email
         });
 
-        // If the user is successfully created, we send back their data and a token
+        // If the user is successfully created, we send back their data and a login token
         if (user) {
             return res.status(201).json({
                 _id: user._id,
@@ -59,19 +59,25 @@ const registerUser = async (req, res) => {
                 email: user.email,
                 username: user.username,
                 role: user.role,
-                token: generateToken(user._id),
+                token: generateToken(user._id), // The user is automatically logged in
                 avatar: user.avatar,
             });
         } else {
+            // This is a safety fallback for invalid data
             return res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
+        // Critical for Debugging: Log the exact error to the Render/Node terminal
         console.error("Error creating user:", error);
-        // This handles cases where the username or email might still conflict
+
+        // Handle "Duplicate Key" errors (Code 11000)
+        // This happens if someone tries to use an email or username that is already in the system
         if (error.code === 11000) {
             const field = Object.keys(error.keyValue)[0];
             return res.status(400).json({ message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` });
         }
+
+        // If any other error occurs (like database connection issues), send a 400 error with the message
         return res.status(400).json({ message: error.message || 'Error creating user' });
     }
 };
