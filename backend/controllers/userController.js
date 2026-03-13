@@ -44,11 +44,8 @@ const getUserById = async (req, res) => {
 // @route   PUT /api/users/profile
 // @access  Private
 const updateUserProfile = async (req, res) => {
-    console.log("Update Profile Request Received");
-    if (req.user) console.log("User ID:", req.user._id);
-    if (req.file) console.log("File received:", req.file);
-    if (req.body) {
-        console.log("Body received:", JSON.stringify(req.body, null, 2));
+    if (!req.user) {
+        return res.status(401).json({ message: 'Not authorized' });
     }
 
     try {
@@ -70,16 +67,13 @@ const updateUserProfile = async (req, res) => {
             }
 
             if (req.body.password) {
-                // If the user wants to change their password, they must provide the old password
                 if (!req.body.currentPassword) {
-                    res.status(400);
-                    throw new Error('Please provide your current password to set a new one');
+                    return res.status(400).json({ message: 'Please provide your current password to set a new one' });
                 }
 
                 const isMatch = await user.matchPassword(req.body.currentPassword);
                 if (!isMatch) {
-                    res.status(401);
-                    throw new Error('Current password is incorrect');
+                    return res.status(401).json({ message: 'Current password is incorrect' });
                 }
 
                 user.password = req.body.password;
@@ -100,12 +94,13 @@ const updateUserProfile = async (req, res) => {
                 bio: updatedUser.bio,
             });
         } else {
-            res.status(404);
-            throw new Error('User not found');
+            res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
         console.error("Update Profile Error:", error);
-        res.status(500).json({ message: error.message });
+        // Use the status code if it's already set (though we handle it above usually)
+        const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+        res.status(statusCode).json({ message: error.message });
     }
 };
 

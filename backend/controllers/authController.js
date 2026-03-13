@@ -17,6 +17,15 @@ const generateToken = (id) => {
 const registerUser = async (req, res) => {
     const { name, email, password, username } = req.body;
 
+    // Validation: Ensure all required fields are present
+    if (!name || !email || !password) {
+        return res.status(400).json({ message: 'Please provide name, email, and password' });
+    }
+
+    if (password.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
     // First, we check if an account with this email already exists
     const userExists = await User.findOne({ email });
 
@@ -43,7 +52,7 @@ const registerUser = async (req, res) => {
 
         // If the user is successfully created, we send back their data and a token
         if (user) {
-            res.status(201).json({
+            return res.status(201).json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
@@ -52,6 +61,8 @@ const registerUser = async (req, res) => {
                 token: generateToken(user._id),
                 avatar: user.avatar,
             });
+        } else {
+            return res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
         // This handles cases where the username or email might still conflict
@@ -59,7 +70,7 @@ const registerUser = async (req, res) => {
             const field = Object.keys(error.keyValue)[0];
             return res.status(400).json({ message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` });
         }
-        res.status(400).json({ message: 'Invalid user data', error: error.message });
+        return res.status(400).json({ message: 'Error creating user', error: error.message });
     }
 };
 

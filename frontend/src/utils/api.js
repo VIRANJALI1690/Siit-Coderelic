@@ -1,9 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: "https://siit-backend-hvs7.onrender.com/api",
+    baseURL: import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`,
 });
-
 // Add a request interceptor to include the token
 api.interceptors.request.use(
     (config) => {
