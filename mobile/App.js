@@ -44,7 +44,7 @@ export default function App() {
   `;
 
     // Use production URL if it exists, otherwise use local IP
-    const productionUrl = ""; // Add your Vercel URL here after deployment
+    const productionUrl = "https://siit-coderelic.vercel.app"; // Add your Vercel URL here after deployment
     const frontendUrl = productionUrl || `http://${config.localIP}:${config.frontendPort}`;
 
     // Handle hardware back button on Android to navigate within WebView
