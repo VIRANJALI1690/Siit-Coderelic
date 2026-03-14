@@ -12,26 +12,28 @@ cloudinary.config({
 });
 
 if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-    console.warn("WARNING: Cloudinary credentials are missing in .env file. File uploads will likely fail.");
+    console.warn("WARNING: Cloudinary credentials missing. Uploads will fail.");
 }
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: async (req, file) => {
-        let resourceType = 'auto'; // Default to auto
-        if (file.mimetype.startsWith('video')) {
-            resourceType = 'video';
-        }
-
+        // Explicitly set resource_type for videos
+        const isVideo = file.mimetype.startsWith('video');
         return {
             folder: 'siit_coderelic',
-            resource_type: resourceType,
-            allowed_formats: ['jpg', 'png', 'jpeg', 'mp4', 'mov', 'webm', 'webp'], // Added webp
-            // public_id: file.originalname.split('.')[0], // Optional: keep original name logic
+            resource_type: isVideo ? 'video' : 'image', 
+            allowed_formats: ['jpg', 'png', 'jpeg', 'mp4', 'mov', 'webm', 'webp'],
         };
     },
 });
 
-const upload = multer({ storage: storage });
+// IMPROVED: Added file size limits here (500MB)
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 500 * 1024 * 1024, // 500MB limit
+    }
+});
 
 module.exports = { cloudinary, upload };

@@ -1,242 +1,286 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import api from '../utils/api';
-import { Upload, X, Save } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import api from "../utils/api";
+import { X, Plus, Github, Globe, Image as ImageIcon, Video, ArrowLeft, Info } from "lucide-react";
 
-// The PublishProject page handles both creating new projects and editing existing ones
 const PublishProject = () => {
-    const navigate = useNavigate();
-    const { id } = useParams(); // If there is an ID in the URL, we are in "Edit Mode"
-    const isEditMode = !!id;
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
+  
+  const thumbRef = useRef(null);
+  const videoRef = useRef(null);
 
-    // We store all the project details in this formData state
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        projectType: 'Dynamic',
-        githubLink: '',
-        liveLink: '',
-        thumbnail: '',
-        demoVideo: '',
-        techInput: '',
-        technologies: []
-    });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [fetching, setFetching] = useState(isEditMode);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    projectType: "",
+    githubLink: "",
+    liveLink: "",
+    techInput: "",
+    technologies: [],
+  });
 
-    const { title, description, projectType, githubLink, liveLink, techInput, technologies } = formData;
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [videoPreview, setVideoPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(isEditMode);
+  const [error, setError] = useState("");
 
-    // If we are editing, we fetch the existing project data when the page loads
-    useEffect(() => {
-        if (isEditMode) {
-            const fetchProject = async () => {
-                try {
-                    const { data } = await api.get(`/projects/${id}`);
-                    // Fill the form with the project's current details
-                    setFormData({
-                        title: data.title,
-                        description: data.description,
-                        projectType: data.projectType,
-                        githubLink: data.githubLink || '',
-                        liveLink: data.liveLink || '',
-                        technologies: data.technologies || [],
-                        techInput: '',
-                        thumbnail: data.thumbnail
-                    });
-                    setFetching(false);
-                } catch (err) {
-                    setError('Failed to load project data');
-                    setFetching(false);
-                }
-            };
-            fetchProject();
-        }
-    }, [id, isEditMode]);
+  const { title, description, projectType, githubLink, liveLink, techInput, technologies } = formData;
 
-    // Handle normal text changes in the form
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    // When the user presses Enter in the tech input, add it to the list
-    const handleTechKeyDown = (e) => {
-        if (e.key === 'Enter' && techInput.trim() !== '') {
-            e.preventDefault();
-            if (!technologies.includes(techInput.trim())) {
-                setFormData({
-                    ...formData,
-                    technologies: [...technologies, techInput.trim()],
-                    techInput: ''
-                });
-            }
-        }
-    };
-
-    // Remove a technology from the list
-    const removeTech = (techToRemove) => {
-        setFormData({
-            ...formData,
-            technologies: technologies.filter(tech => tech !== techToRemove)
-        });
-    };
-
-    // Handle the final form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
-
-        // Basic validation: must have at least one technology
-        if (technologies.length === 0) {
-            setError('Please add at least one technology');
-            setLoading(false);
-            return;
-        }
-
-        // For new projects, an image (thumbnail) is required
-        if (!isEditMode && !formData.thumbnailFile) {
-            setError('Please upload a thumbnail for the new project');
-            setLoading(false);
-            return;
-        }
-
-        // We use FormData because we are uploading files (images/videos)
-        const data = new FormData();
-        data.append('title', title);
-        data.append('description', description);
-        data.append('projectType', projectType);
-        data.append('githubLink', githubLink);
-        data.append('liveLink', liveLink);
-        technologies.forEach(tech => data.append('technologies', tech));
-
-        if (formData.thumbnailFile) {
-            data.append('thumbnail', formData.thumbnailFile);
-        }
-        if (formData.demoVideoFile) {
-            data.append('demoVideo', formData.demoVideoFile);
-        }
-
+  useEffect(() => {
+    if (isEditMode) {
+      const fetchProject = async () => {
         try {
-            if (isEditMode) {
-                // If editing, use PUT to update
-                await api.put(`/projects/${id}`, data);
-            } else {
-                // If creating new, use POST
-                await api.post('/projects', data);
-            }
-            // Go back to the home page after success
-            navigate('/');
+          const { data } = await api.get(`/projects/${id}`);
+          setFormData({
+            ...data,
+            techInput: "",
+            githubLink: data.githubLink || "",
+            liveLink: data.liveLink || "",
+            technologies: data.technologies || [],
+          });
+          setThumbnailPreview(data.thumbnail);
+          setVideoPreview(data.demoVideo);
+          setFetching(false);
         } catch (err) {
-            setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'publish'} project`);
-            setLoading(false);
+          setError("Could not load project.");
+          setFetching(false);
         }
-    };
+      };
+      fetchProject();
+    }
+  }, [id, isEditMode]);
 
-    if (fetching) return <div className="text-center mt-20 text-slate-900 dark:text-white">Loading project data...</div>;
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    return (
-        <div className="max-w-4xl mx-auto px-4 py-8">
-            {/* Container without animation */}
-            <div
-                className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-slate-200 dark:border-slate-700"
-            >
-                <h2 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white border-b pb-4 dark:border-slate-700 flex items-center">
-                    {isEditMode ? <><Save className="mr-3 text-indigo-500" /> Edit Project</> : <><Upload className="mr-3 text-indigo-500" /> Publish New Project</>}
-                </h2>
+  const addTechnology = () => {
+    if (techInput.trim() && !technologies.includes(techInput.trim())) {
+      setFormData({
+        ...formData,
+        technologies: [...technologies, techInput.trim()],
+        techInput: "",
+      });
+    }
+  };
 
-                {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg relative mb-6" role="alert">
-                        <strong className="font-bold">Error: </strong>
-                        <span className="block sm:inline">{error}</span>
-                    </div>
-                )}
+  const removeTech = (tech) => setFormData({ ...formData, technologies: technologies.filter(t => t !== tech) });
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Title Input */}
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Project Title</label>
-                            <input type="text" name="title" value={title} onChange={handleChange} required className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" placeholder="e.g. Siit Coderelic" />
-                        </div>
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const data = new FormData();
+    Object.keys(formData).forEach(key => {
+      if (!['technologies', 'thumbnailFile', 'demoVideoFile', 'techInput', 'thumbnail', 'demoVideo'].includes(key)) {
+        data.append(key, formData[key]);
+      }
+    });
+    technologies.forEach(t => data.append("technologies", t));
+    if (formData.thumbnailFile) data.append("thumbnail", formData.thumbnailFile);
+    if (formData.demoVideoFile) data.append("demoVideo", formData.demoVideoFile);
 
-                        {/* Description Input */}
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
-                            <textarea name="description" value={description} onChange={handleChange} required rows="4" className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" placeholder="Describe your project..." />
-                        </div>
+    try {
+      isEditMode ? await api.put(`/projects/${id}`, data) : await api.post("/projects", data);
+      navigate("/");
+    } catch (err) {
+      setError("Failed to save project.");
+      setLoading(false);
+    }
+  };
 
-                        {/* Dropdown for Static vs Dynamic */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Project Type</label>
-                            <select name="projectType" value={projectType} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all">
-                                <option value="Static">Static</option>
-                                <option value="Dynamic">Dynamic</option>
-                            </select>
-                        </div>
+  if (fetching) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] dark:bg-[#0B1120]">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+    </div>
+  );
 
-                        {/* Tech Tag Input */}
-                        <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Technologies Used (Press Enter to add)</label>
-                            <input type="text" name="techInput" value={techInput} onChange={handleChange} onKeyDown={handleTechKeyDown} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" placeholder="React, Node.js..." />
-                            <div className="flex flex-wrap gap-2 mt-2">
-                                {technologies.map((tech, index) => (
-                                    <span key={index} className="px-2 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-sm rounded-full flex items-center border border-indigo-100 dark:border-indigo-800">
-                                        {tech}
-                                        <button type="button" onClick={() => removeTech(tech)} className="ml-1 text-indigo-500 hover:text-indigo-800 dark:hover:text-white">
-                                            <X size={14} />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
+  const labelClass = "block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2";
+  const inputClass = "w-full bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400";
 
-                        {/* Links Section */}
-                        <div className="col-span-2 md:col-span-1">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">GitHub Repository Link</label>
-                            <input type="url" name="githubLink" value={githubLink} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" placeholder="https://github.com/..." />
-                        </div>
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0B1120] transition-colors duration-300">
+      {/* Reduced py-12 to py-6 to close the gap from the navbar */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        
+        <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors mb-4 text-sm font-medium"
+        >
+          <ArrowLeft size={16} /> Back to Dashboard
+        </button>
 
-                        <div className="col-span-2 md:col-span-1">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Live Demo Link</label>
-                            <input type="url" name="liveLink" value={liveLink} onChange={handleChange} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" placeholder="https://..." />
-                        </div>
-
-                        {/* File Uploads Section */}
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                {isEditMode ? 'Update Thumbnail (Leave empty to keep current)' : 'Thumbnail (Image)'}
-                            </label>
-                            <input type="file" accept="image/*" name="thumbnail" onChange={(e) => setFormData({ ...formData, thumbnailFile: e.target.files[0] })} required={!isEditMode} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
-                        </div>
-
-                        <div className="col-span-2">
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                {isEditMode ? 'Update Demo Video' : 'Demo Video (Optional)'}
-                            </label>
-                            <input type="file" accept="video/*" name="demoVideo" onChange={(e) => setFormData({ ...formData, demoVideoFile: e.target.files[0] })} className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all" />
-                        </div>
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="flex justify-end pt-6">
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={`flex items-center px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-                        >
-                            {loading ? (isEditMode ? 'Updating...' : 'Publishing...') : (
-                                <>
-                                    {isEditMode ? <Save size={20} className="mr-2" /> : <Upload size={20} className="mr-2" />}
-                                    {isEditMode ? 'Update Project' : 'Publish Project'}
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </form>
-            </div>
+        {/* Tightened Header: reduced mb-10 to mb-6 and text size from 4xl to 3xl */}
+        <div className="text-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            {isEditMode ? "Edit your project" : "Publish a project"}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-base">
+            Share your project with the SIIT Coderelic.
+          </p>
         </div>
-    );
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm rounded-xl flex items-center gap-3">
+             <Info size={18} /> {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* Section 1: Basic Info */}
+          <div className="bg-white dark:bg-[#111827] p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center text-xs">1</span>
+              Basic Details
+            </h2>
+            
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className={labelClass}>Project Title <span className="text-red-500">*</span></label>
+                <input type="text" name="title" value={title} onChange={handleChange} required className={inputClass} placeholder="e.g. Smart Attendance System" />
+              </div>
+
+              <div>
+                <label className={labelClass}>Detailed Description <span className="text-red-500">*</span></label>
+                <textarea name="description" value={description} onChange={handleChange} required rows="4" className={inputClass} placeholder="Tell us about the problem you solved..." />
+              </div>
+
+              <div>
+                <label className={labelClass}>Project Environment</label>
+                <div className="grid grid-cols-2 gap-4">
+                  {['Static', 'Dynamic'].map((type) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setFormData({...formData, projectType: type})}
+                      className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all ${projectType === type 
+                        ? 'bg-indigo-600 border-indigo-600 text-white' 
+                        : 'bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-indigo-500'}`}
+                    >
+                      {type === 'Static' ? 'Frontend Only' : 'Full Stack / Dynamic'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Links & Stack */}
+          <div className="bg-white dark:bg-[#111827] p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center text-xs">2</span>
+              Links & Stack
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className={labelClass}>GitHub Repository</label>
+                <div className="relative">
+                  <Github size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input type="url" name="githubLink" value={githubLink} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://github.com/..." />
+                </div>
+              </div>
+              <div>
+                <label className={labelClass}>Live Preview</label>
+                <div className="relative">
+                  <Globe size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input type="url" name="liveLink" value={liveLink} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://..." />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Technology Stack</label>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  name="techInput" 
+                  value={techInput} 
+                  onChange={handleChange} 
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
+                  className={inputClass} 
+                  placeholder="Press Enter to add" 
+                />
+                <button type="button" onClick={addTechnology} className="px-6 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl font-bold text-sm hover:bg-slate-200">Add</button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-4">
+                {technologies.map(tech => (
+                  <span key={tech} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                    {tech}
+                    <X size={14} className="cursor-pointer" onClick={() => removeTech(tech)} />
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3: Media */}
+          <div className="bg-white dark:bg-[#111827] p-6 md:p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span className="w-7 h-7 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center text-xs">3</span>
+              Project Media
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <label className={labelClass}>Thumbnail Image</label>
+                <div 
+                  onClick={() => thumbRef.current.click()}
+                  className="group relative aspect-video rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition-all overflow-hidden"
+                >
+                  {thumbnailPreview ? (
+                    <img src={thumbnailPreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center">
+                      <ImageIcon size={24} className="mx-auto text-slate-400 group-hover:text-indigo-500" />
+                      <p className="mt-2 text-xs font-bold text-slate-500">Upload Cover</p>
+                    </div>
+                  )}
+                </div>
+                <input type="file" ref={thumbRef} hidden accept="image/*" onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) { setFormData({...formData, thumbnailFile: file}); setThumbnailPreview(URL.createObjectURL(file)); }
+                }} />
+              </div>
+
+              <div className="space-y-3">
+                <label className={labelClass}>Demo Video</label>
+                <div 
+                  onClick={() => videoRef.current.click()}
+                  className="group relative aspect-video rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-500 transition-all overflow-hidden"
+                >
+                  {videoPreview ? (
+                    <video src={videoPreview} className="w-full h-full object-cover" controls />
+                  ) : (
+                    <div className="text-center">
+                      <Video size={24} className="mx-auto text-slate-400 group-hover:text-indigo-500" />
+                      <p className="mt-2 text-xs font-bold text-slate-500">Upload Video</p>
+                    </div>
+                  )}
+                </div>
+                <input type="file" ref={videoRef} hidden accept="video/*" onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) { setFormData({...formData, demoVideoFile: file}); setVideoPreview(URL.createObjectURL(file)); }
+                }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-6 pt-2">
+            <button type="button" onClick={() => navigate(-1)} className="text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">Discard</button>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all transform hover:-translate-y-0.5"
+            >
+              {loading ? "Publishing..." : isEditMode ? "Update Project" : "Publish Project"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 };
 
 export default PublishProject;

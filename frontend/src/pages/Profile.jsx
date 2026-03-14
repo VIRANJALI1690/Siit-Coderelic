@@ -1,62 +1,71 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import ProjectCard from '../components/ProjectCard';
-import { Edit, Github, Linkedin, Briefcase, Mail, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { 
+    Edit, 
+    Github, 
+    Linkedin, 
+    Briefcase, 
+    Mail, 
+    Trash2, 
+    Layout, 
+    User as UserIcon, 
+    Camera, 
+    X,
+    ArrowLeft
+} from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-// The Profile page shows the user's information and the projects they have uploaded
 const Profile = () => {
-    // We get the current user from our AuthContext
     const { user } = useAuth();
+    const location = useLocation();
+    const navigate = useNavigate();
+    const fileInputRef = useRef(null);
+    
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [activeTab, setActiveTab] = useState('projects');
 
-    // This state stores the values when the user is editing their profile info
     const [editForm, setEditForm] = useState({
-        name: '',
-        jobRole: '',
-        linkedin: '',
-        github: '',
-        bio: '',
-        avatar: ''
+        name: '', jobRole: '', linkedin: '', github: '', bio: ''
     });
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
-    // When the user data is available, we pre-fill the edit form
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get('tab')) setActiveTab(params.get('tab'));
+    }, [location]);
+
     useEffect(() => {
         if (user) {
             setEditForm({
-                name: user.name || '',
+                name: user.name || '', 
                 jobRole: user.jobRole || '',
-                linkedin: user.linkedin || '',
+                linkedin: user.linkedin || '', 
                 github: user.github || '',
-                bio: user.bio || '',
-                avatar: user.avatar || ''
+                bio: user.bio || ''
             });
             fetchMyProjects();
         }
     }, [user]);
 
-    // This function fetches only the projects that belong to the logged-in user
     const fetchMyProjects = async () => {
         try {
             const { data } = await api.get('/projects/myprojects');
             setProjects(data);
             setLoading(false);
         } catch (error) {
-            console.error('Failed to fetch projects');
             setLoading(false);
         }
     };
 
-    // This function allows a user to delete their own project
     const handleDeleteProject = async (id) => {
-        if (window.confirm('Are you sure you want to delete this project?')) {
+        if (window.confirm('Delete this project forever?')) {
             try {
-                // Call the API to delete from the database
                 await api.delete(`/projects/${id}`);
-                // Remove it from the local state list so it disappears instantly
                 setProjects(projects.filter(p => p._id !== id));
             } catch (error) {
                 alert('Failed to delete project');
@@ -64,137 +73,188 @@ const Profile = () => {
         }
     };
 
-    // This function handles updating the user's profile details
-    const handleUpdateProfile = async (e) => {
-        e.preventDefault();
-
-        // Use FormData for profile updates (because of the avatar image upload)
-        const formData = new FormData();
-        formData.append('name', editForm.name);
-        formData.append('jobRole', editForm.jobRole);
-        formData.append('linkedin', editForm.linkedin);
-        formData.append('github', editForm.github);
-        formData.append('bio', editForm.bio);
-        if (editForm.avatarFile) {
-            formData.append('avatar', editForm.avatarFile);
-        }
-
-        try {
-            const { data } = await api.put('/users/profile', formData);
-            // Update the locally stored user info with the new details
-            localStorage.setItem('userInfo', JSON.stringify({ ...user, ...data }));
-            // Refresh to update the whole app with the new info
-            window.location.reload();
-            setIsEditing(false);
-        } catch (error) {
-            console.error(error);
-            alert('Failed to update profile: ' + (error.response?.data?.message || error.message));
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setAvatarFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
         }
     };
 
-    if (!user) return <div className="text-center mt-20 text-slate-900 dark:text-white">Please login to view profile</div>;
+    const handleUpdateProfile = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        Object.keys(editForm).forEach(key => formData.append(key, editForm[key]));
+        if (avatarFile) formData.append('avatar', avatarFile);
+
+        try {
+            const { data } = await api.put('/users/profile', formData);
+            localStorage.setItem('userInfo', JSON.stringify({ ...user, ...data }));
+            window.location.reload();
+        } catch (error) {
+            alert('Update failed');
+        }
+    };
+
+    if (!user) return <div className="text-center mt-20 dark:text-white font-bold">Please login to view profile</div>;
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Left Sidebar: Displays User Profile Details */}
-                <div
-                    className="md:col-span-1"
+        <div className="min-h-screen bg-white dark:bg-[#0B1120] transition-colors pb-10">
+            
+            {/* --- TOP NAV --- */}
+            <div className="max-w-4xl mx-auto px-4 pt-6">
+                <button 
+                    onClick={() => navigate('/')} 
+                    className="flex items-center gap-2 text-slate-500 hover:text-indigo-500 dark:text-slate-400 transition-colors text-sm font-bold"
                 >
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 sticky top-24 border border-slate-200 dark:border-slate-700">
-                        <div className="flex flex-col items-center text-center">
-                            {/* Profile Image with Edit Button */}
-                            <div className="relative mb-4">
-                                <img
-                                    src={user.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + user.username}
-                                    alt="Profile"
-                                    className="w-32 h-32 rounded-full object-cover border-4 border-indigo-500"
-                                />
-                                <button
-                                    onClick={() => setIsEditing(!isEditing)}
-                                    className="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full text-white hover:bg-indigo-700 transition-colors"
-                                >
-                                    <Edit size={16} />
-                                </button>
+                    <ArrowLeft size={16} /> Back to Dashboard
+                </button>
+            </div>
+
+            {/* --- HEADER SECTION --- */}
+            <div className="max-w-4xl mx-auto px-4 py-10 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-20">
+                    
+                    {/* DP with Instagram Overlay */}
+                    <div 
+                        className="relative shrink-0 group cursor-pointer"
+                        onClick={() => setIsEditing(true)}
+                    >
+                        <img
+                            src={user.avatar || "https://ui-avatars.com/api/?name=" + user.name}
+                            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-2 border-slate-100 dark:border-slate-800 p-1"
+                            alt="Profile"
+                        />
+                        <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center transition-all duration-300">
+                            <Camera className="text-white" size={24} />
+                            <span className="text-[10px] text-white font-bold uppercase mt-1">Change Photo</span>
+                        </div>
+                    </div>
+
+                    {/* User Info */}
+                    <div className="flex-1 space-y-5 text-center md:text-left">
+                        <div className="flex flex-col md:flex-row md:items-center gap-4">
+                            <h2 className="text-2xl font-light dark:text-white">{user.name}</h2>
+                            <button onClick={() => setIsEditing(true)} className="px-6 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-sm font-bold dark:text-white transition-all">
+                                Edit Profile
+                            </button>
+                            {/* Settings Icon Removed as requested */}
+                        </div>
+
+                        <div className="flex justify-center md:justify-start gap-8 text-sm md:text-base">
+                            <span className="dark:text-white"><b>{projects.length}</b> projects</span>
+                            <span className="dark:text-white"><b>Verified</b> Student</span>
+                        </div>
+
+                        <div className="space-y-1">
+                            <p className="font-bold dark:text-white">{user.jobRole || "SIIT Student"}</p>
+                            <p className="text-sm dark:text-slate-300 max-w-md">{user.bio || "Digital relic builder at SIIT."}</p>
+                            
+                            <div className="flex justify-center md:justify-start gap-4 pt-3 text-slate-500 dark:text-slate-400">
+                                {user.github && <a href={user.github} target="_blank" rel="noreferrer" className="hover:text-indigo-600"><Github size={20} /></a>}
+                                {user.linkedin && <a href={user.linkedin} target="_blank" rel="noreferrer" className="hover:text-indigo-600"><Linkedin size={20} /></a>}
+                                <a href={`mailto:${user.email}`} className="hover:text-indigo-600"><Mail size={20} /></a>
                             </div>
-
-                            {/* Show the Edit Form if 'isEditing' is true, otherwise show profile info */}
-                            {isEditing ? (
-                                <form onSubmit={handleUpdateProfile} className="w-full space-y-3">
-                                    <input value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} placeholder="Full Name" className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
-                                    <input value={editForm.jobRole} onChange={e => setEditForm({ ...editForm, jobRole: e.target.value })} placeholder="Job Role (e.g. Student)" className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
-                                    <input value={editForm.bio} onChange={e => setEditForm({ ...editForm, bio: e.target.value })} placeholder="Bio" className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
-                                    <input value={editForm.linkedin} onChange={e => setEditForm({ ...editForm, linkedin: e.target.value })} placeholder="LinkedIn URL" className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
-                                    <input value={editForm.github} onChange={e => setEditForm({ ...editForm, github: e.target.value })} placeholder="GitHub URL" className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500/50 outline-none" />
-                                    <div className="text-left">
-                                        <label className="text-xs text-gray-500 mb-1 block">Profile Picture</label>
-                                        <input type="file" accept="image/*" onChange={e => setEditForm({ ...editForm, avatarFile: e.target.files[0] })} className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white text-sm" />
-                                    </div>
-                                    <div className="flex space-x-2 justify-center pt-2">
-                                        <button type="submit" className="bg-indigo-600 text-white px-4 py-1.5 rounded hover:bg-indigo-700 transition-all font-medium">Save</button>
-                                        <button type="button" onClick={() => setIsEditing(false)} className="bg-gray-500 text-white px-4 py-1.5 rounded hover:bg-gray-600 transition-all font-medium">Cancel</button>
-                                    </div>
-                                </form>
-                            ) : (
-                                <>
-                                    <h2 className="text-2xl font-bold dark:text-white">{user.name}</h2>
-                                    <p className="text-indigo-600 dark:text-indigo-400 font-medium">{user.role}</p>
-                                    {user.jobRole && <p className="text-gray-500 dark:text-gray-400 text-sm mt-1 flex items-center justify-center"><Briefcase size={14} className="mr-1" /> {user.jobRole}</p>}
-                                    <p className="text-gray-600 dark:text-gray-300 mt-4 text-sm">{user.bio || "No bio added yet."}</p>
-
-                                    {/* Social media links */}
-                                    <div className="flex space-x-4 mt-6">
-                                        {user.github && (
-                                            <a href={user.github} target="_blank" rel="noopener noreferrer" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all"><Github size={24} /></a>
-                                        )}
-                                        {user.linkedin && (
-                                            <a href={user.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all"><Linkedin size={24} /></a>
-                                        )}
-                                        <a href={`mailto:${user.email}`} className="text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all"><Mail size={24} /></a>
-                                    </div>
-                                </>
-                            )}
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Right Area: Displays the grid of user's uploaded projects */}
-                <div className="md:col-span-2">
-                    <h3 className="text-2xl font-bold mb-6 dark:text-white border-b pb-2 dark:border-gray-700">My Projects</h3>
+            {/* --- TABS --- */}
+            <div className="flex justify-center">
+                <div className="flex gap-12">
+                    <button 
+                        onClick={() => setActiveTab('projects')}
+                        className={`flex items-center gap-2 py-4 text-xs font-bold uppercase tracking-widest border-t transition-all ${activeTab === 'projects' ? 'border-slate-900 dark:border-white text-slate-900 dark:text-white' : 'border-transparent text-slate-400'}`}
+                    >
+                        <Layout size={14} /> Projects
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('about')}
+                        className={`flex items-center gap-2 py-4 text-xs font-bold uppercase tracking-widest border-t transition-all ${activeTab === 'about' ? 'border-slate-900 dark:border-white text-slate-900 dark:text-white' : 'border-transparent text-slate-400'}`}
+                    >
+                        <UserIcon size={14} /> About
+                    </button>
+                </div>
+            </div>
 
-                    {loading ? (
-                        <p className="dark:text-white">Loading projects...</p>
-                    ) : projects.length === 0 ? (
-                        <p className="dark:text-gray-400 text-center py-10">You haven't published any projects yet.</p>
+            {/* --- CONTENT --- */}
+            <div className="max-w-6xl mx-auto px-4 py-8">
+                {activeTab === 'projects' ? (
+                    loading ? (
+                        <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {projects.map((project) => (
-                                <div key={project._id} className="relative group">
-                                    {/* The ProjectCard shows the project's visual preview */}
+                                <div key={project._id} className="relative group rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800">
                                     <ProjectCard project={project} />
-                                    {/* Admin icons (Edit/Delete) overlay on hover */}
-                                    <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                        <Link
-                                            to={`/edit-project/${project._id}`}
-                                            className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 transition-all"
-                                            title="Edit Project"
-                                        >
-                                            <Edit size={16} />
-                                        </Link>
-                                        <button
-                                            onClick={() => handleDeleteProject(project._id)}
-                                            className="bg-red-600 text-white p-2 rounded hover:bg-red-700 transition-all"
-                                            title="Delete Project"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                        <Link to={`/edit-project/${project._id}`} className="p-2 bg-white/90 dark:bg-slate-900/90 text-indigo-600 rounded-lg shadow-xl"><Edit size={16} /></Link>
+                                        <button onClick={() => handleDeleteProject(project._id)} className="p-2 bg-white/90 dark:bg-slate-900/90 text-red-600 rounded-lg shadow-xl"><Trash2 size={16} /></button>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    )}
-                </div>
+                    )
+                ) : (
+                    <div className="max-w-2xl mx-auto bg-slate-50 dark:bg-slate-900/50 p-8 rounded-2xl text-center">
+                         <Briefcase className="mx-auto mb-4 text-indigo-500" size={32} />
+                         <h3 className="text-xl font-bold dark:text-white mb-2">Academic Profile</h3>
+                         <p className="text-slate-500 dark:text-slate-400">Verified SIIT Student account. Focused on building high-quality technical projects.</p>
+                    </div>
+                )}
             </div>
+
+            {/* --- EDIT MODAL --- */}
+            {isEditing && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-800 overflow-y-auto max-h-[90vh]">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold dark:text-white">Edit Profile</h3>
+                            <button onClick={() => setIsEditing(false)} className="text-slate-400 hover:text-red-500"><X size={24} /></button>
+                        </div>
+                        
+                        <form onSubmit={handleUpdateProfile} className="space-y-4">
+                            {/* Hidden File Input */}
+                            <div className="flex flex-col items-center gap-2 mb-4">
+                                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-indigo-500">
+                                    <img src={previewUrl || user.avatar || `https://ui-avatars.com/api/?name=${user.name}`} className="w-full h-full object-cover" />
+                                </div>
+                                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" hidden />
+                                <button type="button" onClick={() => fileInputRef.current.click()} className="text-xs font-bold text-indigo-500">Change Profile Photo</button>
+                            </div>
+
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Name</label>
+                                    <input value={editForm.name} onChange={e => setEditForm({...editForm, name: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none text-sm dark:text-white" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Job Role</label>
+                                    <input value={editForm.jobRole} onChange={e => setEditForm({...editForm, jobRole: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none text-sm dark:text-white" placeholder="Student / Developer" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Bio</label>
+                                    <textarea value={editForm.bio} onChange={e => setEditForm({...editForm, bio: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none text-sm dark:text-white min-h-[80px]" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">GitHub URL</label>
+                                    <input value={editForm.github} onChange={e => setEditForm({...editForm, github: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none text-sm dark:text-white" placeholder="https://github.com/..." />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">LinkedIn URL</label>
+                                    <input value={editForm.linkedin} onChange={e => setEditForm({...editForm, linkedin: e.target.value})} className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl outline-none text-sm dark:text-white" placeholder="https://linkedin.com/in/..." />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button type="submit" className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700">Save</button>
+                                <button type="button" onClick={() => setIsEditing(false)} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 dark:text-white rounded-xl font-bold text-sm">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
