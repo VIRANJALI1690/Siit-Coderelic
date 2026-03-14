@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { Analytics } from "@vercel/analytics/react";
 
 // Components
 import Navbar from './components/Navbar';
@@ -38,6 +39,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0B1120] transition-colors duration-200">
+          
           <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
           <main className="flex-grow">
@@ -54,8 +56,12 @@ function App() {
               <Route path="/projects/:id" element={<ProjectDetails />} />
             </Routes>
           </main>
-          
+
           <Footer />
+
+          {/* Vercel Analytics */}
+          <Analytics />
+
         </div>
       </Router>
     </AuthProvider>
