@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Search, LogOut, Sun, Moon, User as UserIcon, Lock, ChevronDown, ArrowRight, Info } from 'lucide-react';
+import { Search, LogOut, Sun, Moon, User as UserIcon, Lock, ChevronDown, ArrowRight, Menu, X } from 'lucide-react';
 import ChangePasswordModal from './ChangePasswordModal';
 
 const Navbar = ({ darkMode, toggleDarkMode }) => {
@@ -9,6 +9,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
     const navigate = useNavigate();
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for phone view
     const [searchValue, setSearchValue] = useState("");
     const dropdownRef = useRef(null);
 
@@ -78,6 +79,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
                         {/* Right Side: Navigation & Profile */}
                         <div className="flex items-center gap-2 ml-6">
+                            {/* Dark Mode Toggle */}
                             <button
                                 onClick={toggleDarkMode}
                                 className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -87,7 +89,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
                             {isAuthenticated ? (
                                 <div className="flex items-center gap-4">
-                                    {/* --- NAVIGATION LINKS --- */}
+                                    {/* DESKTOP LINKS (Hidden on mobile/tablet) */}
                                     <div className="hidden lg:flex items-center gap-6 px-4">
                                         <Link to="/publish" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-colors">
                                             Publish Project
@@ -95,12 +97,12 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                                         <Link to="/objective" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-colors">
                                             Our Objective
                                         </Link>
-                                        {/* Added AboutSIIT back here */}
                                         <Link to="/about" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition-colors">
                                             About SIIT
                                         </Link>
                                     </div>
 
+                                    {/* PROFILE DROPDOWN */}
                                     <div className="relative" ref={dropdownRef}>
                                         <button
                                             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
@@ -134,6 +136,14 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                                             </div>
                                         )}
                                     </div>
+
+                                    {/* PHONE MENU TOGGLE (Visible only on mobile/tablet) */}
+                                    <button 
+                                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                        className="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    >
+                                        {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                                    </button>
                                 </div>
                             ) : (
                                 <div className="flex items-center gap-4">
@@ -144,6 +154,21 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                         </div>
                     </div>
                 </div>
+
+                {/* MOBILE MENU CONTENT (Visible when toggled on small screens) */}
+                {isMobileMenuOpen && isAuthenticated && (
+                    <div className="lg:hidden bg-white dark:bg-[#0B1120] border-t border-slate-100 dark:border-slate-800 px-4 py-4 space-y-2">
+                        <Link to="/publish" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-base font-bold text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600">
+                            Publish Project
+                        </Link>
+                        <Link to="/objective" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-base font-bold text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600">
+                            Our Objective
+                        </Link>
+                        <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 rounded-lg text-base font-bold text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600">
+                            About SIIT
+                        </Link>
+                    </div>
+                )}
             </nav>
             <ChangePasswordModal isOpen={isPasswordModalOpen} onClose={() => setIsPasswordModalOpen(false)} />
         </>
