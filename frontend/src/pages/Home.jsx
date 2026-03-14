@@ -65,6 +65,9 @@ const Home = () => {
                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white">
                         The <span className="text-indigo-600">Platform</span>
                     </h1>
+                    <p className="text-lg md:text-2xl text-[#475569] dark:text-[#94A3B8] font-medium leading-[1.6]">
+                                Where Seniors Build. Juniors Get Inspired.
+                    </p>
                     <p className="text-xl text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
                         Your final year project is your opportunity to shape the next generation of coders. Share your journey and breakthroughs to help others succeed.
                     </p>
