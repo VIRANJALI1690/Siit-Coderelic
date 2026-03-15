@@ -10,7 +10,7 @@ const {
 } = require('../controllers/projectController');
 const { protect } = require('../middleware/authMiddleware');
 
-// This is the file we just updated with the 500MB limit
+// This is the file we just updated with the 1000MB limit
 const { upload } = require('../utils/cloudinary');
 
 // --- IMPROVED MIDDLEWARE ---
@@ -25,7 +25,7 @@ const uploadProjectMedia = (req, res, next) => {
             // Check if the error is specifically because the file is too big
             if (err.code === 'LIMIT_FILE_SIZE') {
                 return res.status(400).json({ 
-                    message: 'The video file is too large. Max limit is 500MB.' 
+                    message: 'The video file is too large. Max limit is 1000MB.' 
                 });
             }
 

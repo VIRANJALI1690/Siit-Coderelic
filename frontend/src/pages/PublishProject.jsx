@@ -175,14 +175,14 @@ const PublishProject = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className={labelClass}>GitHub Repository</label>
+                <label className={labelClass}>GitHub Repository Link</label>
                 <div className="relative">
                   <Github size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input type="url" name="githubLink" value={githubLink} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://github.com/..." />
                 </div>
               </div>
               <div>
-                <label className={labelClass}>Live Preview</label>
+                <label className={labelClass}>Live/demo Preview Link</label>
                 <div className="relative">
                   <Globe size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input type="url" name="liveLink" value={liveLink} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://..." />
@@ -191,7 +191,7 @@ const PublishProject = () => {
             </div>
 
             <div>
-              <label className={labelClass}>Technology Stack</label>
+              <label className={labelClass}>Technology Stack/Languages</label>
               <div className="flex gap-2">
                 <input 
                   type="text" 
@@ -200,7 +200,7 @@ const PublishProject = () => {
                   onChange={handleChange} 
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnology())}
                   className={inputClass} 
-                  placeholder="Press Enter to add" 
+                  placeholder="HTML, CSS, Javascript, Python, ReactJS,..." 
                 />
                 <button type="button" onClick={addTechnology} className="px-6 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl font-bold text-sm hover:bg-slate-200">Add</button>
               </div>
@@ -234,7 +234,7 @@ const PublishProject = () => {
                   ) : (
                     <div className="text-center">
                       <ImageIcon size={24} className="mx-auto text-slate-400 group-hover:text-indigo-500" />
-                      <p className="mt-2 text-xs font-bold text-slate-500">Upload Cover</p>
+                      <p className="mt-2 text-xs font-bold text-slate-500">Upload Cover/Dashboard Image</p>
                     </div>
                   )}
                 </div>

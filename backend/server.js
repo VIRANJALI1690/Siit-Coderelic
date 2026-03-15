@@ -15,9 +15,9 @@ const app = express();
 
 // Middleware section
 // These lines allow the server to understand JSON data and long forms
-// Change from 50mb to 500mb
-app.use(express.json({ limit: '500mb' }));
-app.use(express.urlencoded({ limit: '500mb', extended: true }));
+// Change from 500mb to 1000mb
+app.use(express.json({ limit: '1000mb' }));
+app.use(express.urlencoded({ limit: '1000mb', extended: true }));
 
 // This allows other websites (like our frontend) to talk to this API
 app.use(cors());

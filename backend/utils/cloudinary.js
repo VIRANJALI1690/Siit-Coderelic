@@ -28,11 +28,11 @@ const storage = new CloudinaryStorage({
     },
 });
 
-// IMPROVED: Added file size limits here (500MB)
+// IMPROVED: Added file size limits here (1000MB)
 const upload = multer({ 
     storage: storage,
     limits: {
-        fileSize: 500 * 1024 * 1024, // 500MB limit
+        fileSize: 1000 * 1024 * 1024, // 1000MB limit
     }
 });
 
