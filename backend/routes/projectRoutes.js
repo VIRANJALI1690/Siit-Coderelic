@@ -16,7 +16,7 @@ const { upload } = require('../utils/cloudinary');
 // --- IMPROVED MIDDLEWARE ---
 const uploadProjectMedia = (req, res, next) => {
     upload.fields([
-        { name: 'thumbnail', maxCount: 1 }, 
+        { name: 'thumbnail', maxCount: 1 },
         { name: 'demoVideo', maxCount: 1 }
     ])(req, res, (err) => {
         if (err) {
@@ -24,14 +24,14 @@ const uploadProjectMedia = (req, res, next) => {
 
             // Check if the error is specifically because the file is too big
             if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({ 
-                    message: 'The video file is too large. Max limit is 1000MB.' 
+                return res.status(400).json({
+                    message: 'The video file is too large. Max limit is 1000MB.'
                 });
             }
 
             // Handle other Multer errors (wrong format, etc.)
-            return res.status(400).json({ 
-                message: 'Upload failed: ' + err.message 
+            return res.status(400).json({
+                message: 'Upload failed: ' + err.message
             });
         }
         next();

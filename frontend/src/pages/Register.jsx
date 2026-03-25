@@ -40,7 +40,7 @@ const Register = () => {
             navigate('/');
         } catch (err) {
             // If there's an error (like email already taken), we show it
-            setError(err.response?.data?.message || 'Registration failed');
+            setError(err.response?.data?.message || 'Email/Username is already taken, try again with different email/username');
         }
     };
 
