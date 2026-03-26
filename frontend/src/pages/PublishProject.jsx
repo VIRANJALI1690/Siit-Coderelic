@@ -142,7 +142,7 @@ const PublishProject = () => {
               </div>
 
               <div>
-                <label className={labelClass}>Detailed Description <span className="text-red-500">*</span></label>
+                <label className={labelClass}>Detailed Description(Idea) <span className="text-red-500">*</span></label>
                 <textarea name="description" value={description} onChange={handleChange} required rows="4" className={inputClass} placeholder="Tell us about the problem you solved..." />
               </div>
 
@@ -175,14 +175,14 @@ const PublishProject = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className={labelClass}>GitHub Repository Link</label>
+                <label className={labelClass}>GitHub Repository Link (Optional)</label>
                 <div className="relative">
                   <Github size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input type="url" name="githubLink" value={githubLink} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://github.com/..." />
                 </div>
               </div>
               <div>
-                <label className={labelClass}>Live/demo Preview Link</label>
+                <label className={labelClass}>Live/demo Preview Link (Optional)</label>
                 <div className="relative">
                   <Globe size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input type="url" name="liveLink" value={liveLink} onChange={handleChange} className={`${inputClass} pl-12`} placeholder="https://..." />
@@ -255,7 +255,7 @@ const PublishProject = () => {
                   ) : (
                     <div className="text-center">
                       <Video size={24} className="mx-auto text-slate-400 group-hover:text-indigo-500" />
-                      <p className="mt-2 text-xs font-bold text-slate-500">Upload Video</p>
+                      <p className="mt-2 text-xs font-bold text-slate-500">Upload Video(Should be less than 1:30 minutes)</p>
                     </div>
                   )}
                 </div>
